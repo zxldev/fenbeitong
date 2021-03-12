@@ -1,3 +1,3 @@
-module github.com/zxldev/didi-enterprise
+module github.com/zxldev/fenbeitong
 
 go 1.15
