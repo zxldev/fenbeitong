@@ -1,23 +1,27 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"fenbeitong/util"
+	"github.com/sirupsen/logrus"
+	"github.com/zxldev/fenbeitong/util"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
 )
+
 /**
 @see http://docs.open.fenbeitong.com/open-api/
- */
+*/
 
 type FenBeiTong struct {
-	AppId      string `json:"app_id"`
-	AppKey  string `json:"app_key"`
+	AppId         string    `json:"app_id"`
+	AppKey        string    `json:"app_key"`
 	SignKey       string    `json:"sign_key"`
-	AdminEmployId    string    `json:"admin_phone"`
+	AdminEmployId string    `json:"admin_phone"`
 	AccessToken   string    `json:"access_token"`
 	TokenExpire   time.Time `json:"token_expire"`
 	ApiUrl        string    `json:"api_url"`
@@ -27,8 +31,7 @@ type FenBeiTong struct {
 
 var FenBeiTongClient FenBeiTong
 
-
-func (d *FenBeiTong) Init(AppId, AppKey, SignKey, AdminEmployId, CompanyId, ApiUrl string) {
+func (d *FenBeiTong) Init(AppId, AppKey, SignKey, AdminEmployId, ApiUrl string) {
 	if ApiUrl == "" {
 		d.ApiUrl = ServerApi
 	} else {
@@ -57,23 +60,34 @@ func (d *FenBeiTong) GetToken() (string, error) {
 		//获取新Token，并且重置过期时间
 		r, err := d.PostAuth("/open/api/auth/v1/dispense",
 			url.Values{
-				"app_id":[]string{d.AppId},
-				"app_key":[]string{d.AppKey},
+				"app_id":  []string{d.AppId},
+				"app_key": []string{d.AppKey},
 			})
 		if err != nil {
 			return "", ErrorNetWork
 		}
-		token := AuthorizeResp{}
-
-		err = json.NewDecoder(r.Body).Decode(&token)
+		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return "", ErrorDecode
 		}
-		if token.Data.AccessToken == "" {
+		logrus.Info(string(b))
+		tokenResp := AuthorizeResp{}
+
+		err = json.Unmarshal(b, &tokenResp)
+		if err != nil {
+			return "", ErrorDecode
+		}
+
+		token := Token{}
+		err = json.Unmarshal(bytes.NewBufferString(tokenResp.Data).Bytes(), &token)
+		if err != nil {
+			return "", ErrorDecode
+		}
+		if token.AccessToken == "" {
 			return "", ErrorGetAccessToken
 		}
-		d.AccessToken = token.Data.AccessToken
-		d.TokenExpire = time.Now().Add(2*time.Hour-60)
+		d.AccessToken = token.AccessToken
+		d.TokenExpire = time.Now().Add(2*time.Hour - 60)
 	}
 
 	return d.AccessToken, nil
@@ -84,18 +98,16 @@ const (
 	ServerApi = "https://open.fenbeitong.com"
 )
 
-
 func (d *FenBeiTong) PostAuth(url string, data url.Values) (resp *http.Response, err error) {
-	return http.PostForm(d.ApiUrl+url,  data)
+	return http.PostForm(d.ApiUrl+url, data)
 }
 
-
-func (d *FenBeiTong) Post(url string, data interface{}) (ret string, err error) {
+func (d *FenBeiTong) Post(url string, data interface{}) (ret interface{}, err error) {
 	token, err := d.GetToken()
 	if err != nil {
 		return "", err
 	}
-	resp, err := http.PostForm(d.ApiUrl+url, util.SignRequest(data, d.SignKey,token,d.AdminEmployId))
+	resp, err := http.PostForm(d.ApiUrl+url, util.SignRequest(data, d.SignKey, token, d.AdminEmployId))
 
 	if err != nil {
 		return "", ErrorNetWork
@@ -105,8 +117,8 @@ func (d *FenBeiTong) Post(url string, data interface{}) (ret string, err error) 
 	json.NewDecoder(resp.Body).Decode(&baseresp)
 
 	if baseresp.Code == 0 {
-		return baseresp.Msg,nil
+		return baseresp.Data, nil
 	} else {
-		return baseresp.Msg, errors.New(baseresp.Msg)
+		return nil, errors.New(baseresp.Msg)
 	}
 }
