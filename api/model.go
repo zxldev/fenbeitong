@@ -58,5 +58,5 @@ type ThirdEmployee struct {
 	DeptId          string `json:"deptId"`
 	ThirdEmployeeId string `json:"thirdEmployeeId"`
 	Dept            string `json:"dept"`
-	Status          string `json:"status"`
+	Status          int    `json:"status"`
 }
