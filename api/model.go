@@ -24,6 +24,32 @@ type Token struct {
 	AccessToken string `json:"access_token"`
 }
 
+type DepartmentQuery struct {
+	CompanyId string `json:"company_id"`
+}
+
+type Department struct {
+
+	//"employeeCount": 0,
+	//"orgUnitFullName":"北京分贝通科技有限公司/财务部/财务一部",
+	//"orgUnitId": "59e9bcc4279863398a0672eb",
+	//"orgThirdUnitId": "",
+	//"orgThirdUnitParentId": "",
+	//"orgUnitName": "财务一部",
+	//"orgUnitParentFullName": "北京分贝通科技有限公司/财务部",
+	//"orgUnitParentId": "5abdf19e27986373488a010f",
+	//"orgUnitParentName": "财务部"
+	EmployeeCount         int    `json:"employeeCount"`
+	OrgUnitFullName       string `json:"orgUnitFullName"`
+	OrgUnitId             string `json:"orgUnitId"`
+	OrgThirdUnitId        string `json:"orgThirdUnitId"`
+	OrgThirdUnitParentId  string `json:"orgThirdUnitParentId"`
+	OrgUnitName           string `json:"orgUnitName"`
+	OrgUnitParentFullName string `json:"orgUnitParentFullName"`
+	OrgUnitParentId       string `json:"orgUnitParentId"`
+	OrgUnitParentName     string `json:"orgUnitParentName"`
+}
+
 type DepartmentAddReq struct {
 	CompanyId     string `json:"company_id"`
 	OrgUnitName   string `json:"org_unit_name"`
