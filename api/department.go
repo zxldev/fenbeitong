@@ -5,14 +5,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (d *FenBeiTong) DepartmentAdd(org string) {
+func (d *FenBeiTong) DepartmentAdd(org string) (ret interface{}, err error) {
 	req := DepartmentAddReq{
 		CompanyId:     d.AppId,
 		OrgUnitName:   org,
 		ThirdOrgId:    org,
 		ThirdParentId: d.AppId,
 	}
-	d.Post("/open/api/third/departments/add", req)
+	return d.Post("/open/api/third/departments/add", req)
 }
 
 func (d *FenBeiTong) DepartmentQuery(company_id string) []Department {
