@@ -30,15 +30,15 @@ func (d *FenBeiTong) ThridInfo() (employeeData ThirdEmployeeListData, err error)
 }
 
 /**
-查询第三方员工信息
-@see http://docs.open.fenbeitong.com/open-api/2apijie-ru/21zu-zhi-jia-gou/218-cha-xun-yuan-gong-xin-606f28-bu-zhi-chi-pi-liang-cha-8be229.html
+查询员工信息
+@see http://docs.open.fenbeitong.com/open-plus/v_1_0/static/pages/zuzhijiagou/yuangongguanli/218-cha-xun-yuan-gong-xin-606f28-bu-zhi-chi-pi-liang-cha-8be229.html
 */
 func (d *FenBeiTong) EmployeesInfo(userCode string) (ret interface{}, err error) {
 	req := map[string]string{
 		"employee_id": userCode,
 		"type":        "1",
 	}
-	return d.Post("/open/api/third/company/third/info", req)
+	return d.Post("/open/api/third/employees/info", req)
 }
 
 /**
